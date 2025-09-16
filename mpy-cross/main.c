@@ -67,7 +67,7 @@ STATIC int compile_and_save(const char *file, const char *output_file, const cha
             source_name = qstr_from_str(source_file);
         }
 
-        #if MICROPY_PY___FILE__
+        #if MICROPY_PY___FILE__ 
         mp_store_global(MP_QSTR___file__, MP_OBJ_NEW_QSTR(source_name));
         #endif
 
@@ -153,7 +153,7 @@ STATIC void pre_process_options(int argc, char **argv) {
                 } else if (strncmp(argv[a + 1], "heapsize=", sizeof("heapsize=") - 1) == 0) {
                     char *end;
                     heap_size = strtol(argv[a + 1] + sizeof("heapsize=") - 1, &end, 0);
-                    // Don't bring unneeded libc dependencies like tolower()
+                    // Don't bring unneeded libc dependencies like tolower() 
                     // If there's 'w' immediately after number, adjust it for
                     // target word size. Note that it should be *before* size
                     // suffix like K or M, to avoid confusion with kilowords,
@@ -339,7 +339,7 @@ int main(int argc, char **argv) {
     return main_(argc, argv);
 }
 
-uint mp_import_stat(const char *path) {
+mp_import_stat_t mp_import_stat(const char *path) {
     (void)path;
     return MP_IMPORT_STAT_NO_EXIST;
 }
