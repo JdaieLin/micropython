@@ -67,14 +67,24 @@ add_custom_command(
 # If any of the dependencies in this rule change then the C-preprocessor step must be run.
 # It only needs to be passed the list of MICROPY_SOURCE_QSTR files that have changed since
 # it was last run, but it looks like it's not possible to specify that with cmake.
-add_custom_command(
-    OUTPUT ${MICROPY_QSTRDEFS_LAST}
-    COMMAND ${Python3_EXECUTABLE} ${MICROPY_PY_DIR}/makeqstrdefs.py pp ${CMAKE_C_COMPILER} -E output ${MICROPY_GENHDR_DIR}/qstr.i.last cflags ${MICROPY_CPP_FLAGS} -DNO_QSTR cxxflags ${MICROPY_CPP_FLAGS} -DNO_QSTR sources ${MICROPY_SOURCE_QSTR}
-    DEPENDS ${MICROPY_MODULEDEFS}
-        ${MICROPY_SOURCE_QSTR}
-    VERBATIM
-    COMMAND_EXPAND_LISTS
-)
+if(MICROPY_SOURCE_QSTR)
+    add_custom_command(
+        OUTPUT ${MICROPY_QSTRDEFS_LAST}
+        COMMAND ${Python3_EXECUTABLE} ${MICROPY_PY_DIR}/makeqstrdefs.py pp ${CMAKE_C_COMPILER} -E output ${MICROPY_GENHDR_DIR}/qstr.i.last cflags ${MICROPY_CPP_FLAGS} -DNO_QSTR cxxflags ${MICROPY_CPP_FLAGS} -DNO_QSTR sources ${MICROPY_SOURCE_QSTR}
+        DEPENDS ${MICROPY_MODULEDEFS}
+            ${MICROPY_SOURCE_QSTR}
+        VERBATIM
+        COMMAND_EXPAND_LISTS
+    )
+else()
+    add_custom_command(
+        OUTPUT ${MICROPY_QSTRDEFS_LAST}
+        COMMAND ${Python3_EXECUTABLE} ${MICROPY_PY_DIR}/makeqstrdefs.py pp ${CMAKE_C_COMPILER} -E output ${MICROPY_GENHDR_DIR}/qstr.i.last cflags ${MICROPY_CPP_FLAGS} -DNO_QSTR cxxflags ${MICROPY_CPP_FLAGS} -DNO_QSTR
+        DEPENDS ${MICROPY_MODULEDEFS}
+        VERBATIM
+        COMMAND_EXPAND_LISTS
+    )
+endif()
 
 add_custom_command(
     OUTPUT ${MICROPY_QSTRDEFS_SPLIT}
@@ -95,7 +105,7 @@ add_custom_command(
 
 add_custom_command(
     OUTPUT ${MICROPY_QSTRDEFS_PREPROCESSED}
-    COMMAND cat ${MICROPY_QSTRDEFS_PY} ${MICROPY_QSTRDEFS_PORT} ${MICROPY_QSTRDEFS_COLLECTED} | sed "s/^Q(.*)/\"&\"/" | ${CMAKE_C_COMPILER} -E ${MICROPY_CPP_FLAGS} - | sed "s/^\\\"\\(Q(.*)\\)\\\"/\\1/" > ${MICROPY_QSTRDEFS_PREPROCESSED}
+    COMMAND cat ${MICROPY_QSTRDEFS_PY} ${MICROPY_QSTRDEFS_PORT} ${MICROPY_QSTRDEFS_COLLECTED} | sed "s/^Q(.*)/\"&\"/" | ${CMAKE_C_COMPILER} -E ${MICROPY_CPP_FLAGS} - | sed "s/^\\\"\\(Q(.*)\\\")/\\1/" > ${MICROPY_QSTRDEFS_PREPROCESSED}
     DEPENDS ${MICROPY_QSTRDEFS_PY}
         ${MICROPY_QSTRDEFS_PORT}
         ${MICROPY_QSTRDEFS_COLLECTED}
@@ -122,7 +132,7 @@ if(MICROPY_FROZEN_MANIFEST)
 
     target_compile_definitions(${MICROPY_TARGET} PUBLIC
         MICROPY_QSTR_EXTRA_POOL=mp_qstr_frozen_const_pool
-        MICROPY_MODULE_FROZEN_MPY=\(1\)
+        MICROPY_MODULE_FROZEN_MPY=\(1
     )
 
     if(NOT MICROPY_LIB_DIR)
