@@ -29,7 +29,17 @@
 
 void mp_stack_ctrl_init(void) {
     volatile int stack_dummy;
+    // This assignment is a dangling pointer, but it works on all currently
+    // supported architectures.  It is used to get a good estimate of the
+    // top of the stack.  GCC 12+ complains about it, so disable the warning.
+    #if defined(__GNUC__) && __GNUC__ >= 12
+    #pragma GCC diagnostic push
+    #pragma GCC diagnostic ignored "-Wdangling-pointer"
+    #endif
     MP_STATE_THREAD(stack_top) = (char *)&stack_dummy;
+    #if defined(__GNUC__) && __GNUC__ >= 12
+    #pragma GCC diagnostic pop
+    #endif
 }
 
 void mp_stack_set_top(void *top) {
